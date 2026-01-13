@@ -179,7 +179,10 @@ class OrderCreateSerializer(OrderSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation["id"] = instance.id
-        representation["tickets"] = TicketSerializer(instance.tickets.all(), many=True).data
+        representation["tickets"] = TicketSerializer(
+            instance.tickets.all(),
+            many=True
+        ).data
         representation["created_at"] = instance.created_at
         return representation
 

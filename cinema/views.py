@@ -140,6 +140,7 @@ class OrderViewSet(
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated,)
+
     def get_queryset(self):
         queryset = self.queryset.filter(user=self.request.user.id)
         if self.action in ("list", "retrieve"):
