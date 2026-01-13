@@ -56,6 +56,7 @@ class MovieViewSet(viewsets.ModelViewSet):
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
     pagination_class = None
+
     def get_queryset(self):
         queryset = self.queryset.prefetch_related("genres", "actors")
         query_params = self.request.query_params
@@ -69,7 +70,7 @@ class MovieViewSet(viewsets.ModelViewSet):
             if genres:
                 genres = [int(genre_id) for genre_id in genres.split(",")]
                 queryset = queryset.filter(genres__id__in=genres)
-        except ValueError as e:
+        except ValueError:
             raise ValidationError({
                 "detail": "Invalid query parameters. IDs must be integers "
                           "separated by commas."
@@ -92,6 +93,7 @@ class MovieSessionViewSet(viewsets.ModelViewSet):
     queryset = MovieSession.objects.all()
     serializer_class = MovieSessionSerializer
     pagination_class = None
+
     def get_queryset(self):
         queryset = self.queryset.select_related("movie", "cinema_hall")
         query_params = self.request.query_params
@@ -113,11 +115,9 @@ class MovieSessionViewSet(viewsets.ModelViewSet):
             except ValueError:
                 raise ValidationError({"detail": "Invalid movie ID."})
         return queryset.annotate(
-            tickets_available=
-            (
+            tickets_available=(
                 F("cinema_hall__rows") * F("cinema_hall__seats_in_row")
-            ) - Count("tickets")
-        )
+            ) - Count("tickets"))
 
     def get_serializer_class(self):
         if self.action == "list":
