@@ -9,6 +9,7 @@ from rest_framework import (
     mixins
 )
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
 from cinema.models import (
@@ -138,7 +139,7 @@ class OrderViewSet(
 ):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-
+    permission_classes = (IsAuthenticated,)
     def get_queryset(self):
         queryset = self.queryset.filter(user=self.request.user.id)
         if self.action in ("list", "retrieve"):
@@ -150,8 +151,6 @@ class OrderViewSet(
         return queryset
 
     def get_serializer_class(self):
-        serializer_class = self.serializer_class
         if self.action == "create":
-            serializer_class = OrderCreateSerializer
-            return serializer_class
-        return serializer_class
+            return OrderCreateSerializer
+        return self.serializer_class
